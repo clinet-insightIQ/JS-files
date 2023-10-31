@@ -15,6 +15,7 @@ const Selectors = {
   engagementRate: `[${profilePrefix}=eng-rate]`,
   medianER: `[${profilePrefix}=median-er]`,
   highLowThan: `[${profilePrefix}=higher-lower]`,
+  ERTagBgColor: `[${profilePrefix}=er-tag-bgColor]`,
   followers: `[${profilePrefix}=followers]`,
   avgLikes: `[${profilePrefix}=avg-likes]`,
   avgComments: `[${profilePrefix}=avg-comments]`,
@@ -40,10 +41,14 @@ const Selectors = {
   NoSponsoredContent: `[input-data=no-sponsored-content]`,
   NoProfileData: `[input-data=no-profile-data]`,
   MainHeroSection: `[input-data=main-hero-section]`,
+  HeaderUsername: `[profile-data=header-username]`,
+  placeholderTitle: "[profile-data=placeholder-title]",
+  mainSpinner: `[profile-data=main-spinner]`,
 };
 
 let HeadingColor = "#13144d";
 let TextColorWhite = "#ffffff";
+let UsernameColor = "#121b2e";
 let HeaderTitle = `Engagement rate for`;
 
 //input
@@ -61,6 +66,9 @@ const NoProfileDateEle = document.querySelector(Selectors.NoProfileData);
 const NoSponsoredContentEle = document.querySelector(
   Selectors.NoSponsoredContent
 );
+const placeholderTitleEle = document.querySelector(Selectors.placeholderTitle);
+const mainSpinnerEle = document.querySelector(Selectors.mainSpinner);
+const ERTagBgColorEle = document.querySelector(Selectors.ERTagBgColor);
 
 //dropdown list
 const resultList = document.querySelector("[data=result-list]");
@@ -69,6 +77,9 @@ const listItemImgAttr = "[data=item-image]";
 const listItemNameAttr = "[data=list-item-name]";
 const listItemUsernameAttr = "[data=list-item-username]";
 const listItemIsVerifiedAttr = "[data=item-is-verified]";
+const SampleHeaderUsernameEle = document.querySelector(
+  Selectors.HeaderUsername
+);
 
 //const loaderEle = document.querySelector("[data=loader]");
 
@@ -159,7 +170,7 @@ const handleTextChange = async (e) => {
             currentHandle = profile.username;
             resultList.style.display = "none";
             updateBrowserUrl();
-            //handleUsernameSubmit();
+            handleUsernameSubmit();
           });
 
           resultList.appendChild(cloneListItem);
@@ -323,15 +334,16 @@ function updateTabContent(tabId, data, profilepicUrl) {
       wrapper.appendChild(clonedListItem);
     });
   } else {
-    console.log("No sponsored data", NoSponsoredContentEle);
+    //console.log("No sponsored data", NoSponsoredContentEle);
     wrapper.innerHTML = "";
-    NoSponsoredContentEle.style.display = "flex";
+    // NoSponsoredContentEle.style.display = "flex";
   }
 }
 
 const updateProfilePage = (results) => {
   NoProfileDateEle.style.display = "none";
   MainHeroSectionEle.style.display = "block";
+  mainSpinnerEle.style.display = "none";
   //basic profile info
   const profilePicEle = document.querySelector(Selectors.profilePicture);
   const profileNameEle = document.querySelector(Selectors.fullname);
@@ -367,6 +379,9 @@ const updateProfilePage = (results) => {
           currentHandle,
           () => {
             copyLinkEle.innerText = "Copied!";
+            setTimeout(() => {
+              copyLinkEle.innerText = "Copy profile link";
+            }, 1500);
           },
           () => {
             copyLinkEle.innerText = "Failed to Copy!";
@@ -376,18 +391,22 @@ const updateProfilePage = (results) => {
     }
 
     if (stats) {
+      console.log("Colors:", stats.engTagColor);
       engRateEle.innerText = `${stats.engagementRate}%`;
-      engMedianRateEle.innerText = `${Math.abs(stats.medianRate)}%`;
+      /* engMedianRateEle.innerText = `${Math.abs(stats.medianRate)}%`;
       if (stats.medianRate < 0) {
         highLowThanEle.innerText = " lower ";
-      }
+      } */
+      highLowThanEle.innerText = "";
+      engMedianRateEle.innerText = `${stats.engagementTag}`;
+      ERTagBgColorEle.style.backgroundColor = `${stats.engTagColor}`;
       followersEle.innerText = stats.followers || "";
       avgLikesEle.innerText = stats.averageLikes || "";
       avgCommentsEle.innerText = stats.averageComments || "";
     }
 
     if (posts) {
-      updateTabContent("latest", posts.latestContent, profile.imageUrl);
+      //  updateTabContent("latest", posts.latestContent, profile.imageUrl);
       updateTabContent("top", posts.topContent, profile.imageUrl);
       // updateTabContent("sponsored", posts.sponseredContent, profile.imageUrl);
       /*   ContentTabsEle.addEventListener("click", (e) => {
@@ -401,8 +420,11 @@ const updateProfilePage = (results) => {
     }
   } else {
     console.log("Show Error Toast");
+    SampleHeaderUsernameEle.style.color = UsernameColor;
+    SampleHeaderUsernameEle.innerText = `@${currentHandle}`;
     MainHeroSectionEle.style.display = "none";
     NoProfileDateEle.style.display = "flex";
+    mainSpinnerEle.style.display = "none";
   }
 };
 
@@ -421,8 +443,9 @@ const handleUsernameSubmit = async (e) => {
   console.log("Curren Username", currentHandle);
 
   const results = await fetchProfileInfo({ handle: currentHandle });
-  console.log("Profile Data:", results);
+  //console.log("Profile Data:", results);
 
+  placeholderTitleEle.style.opacity = 1;
   //<!--- update UI --->
   updateProfilePage(results);
   buttonLoaderEle.style.display = "none";
@@ -430,7 +453,9 @@ const handleUsernameSubmit = async (e) => {
 
   //<!--- Hide header only if there's a profile param
   if (window.location.href.includes("profile")) {
-    SampleHeaderEle.innerText = `${HeaderTitle} @${currentHandle}`;
+    SampleHeaderEle.innerText = `${HeaderTitle} `;
+    SampleHeaderUsernameEle.style.color = UsernameColor;
+    SampleHeaderUsernameEle.innerText = `@${currentHandle}`;
   }
 };
 
@@ -530,7 +555,11 @@ function renderBarGraphs(graphData) {
               let label = "";
 
               if (context.parsed.y !== null) {
-                label += `${context.parsed.y?.toFixed(2)}%`;
+                const parsedValue =
+                  context.parsed.y < 0.01
+                    ? context.parsed.y?.toFixed(3)
+                    : context.parsed.y?.toFixed(2);
+                label += `${parsedValue}%`;
               }
               return label;
             },
@@ -578,6 +607,75 @@ function renderBarGraphs(graphData) {
           },
         },
       },
+      animation: false,
     },
   });
 }
+
+//swipper initialization
+$(".slider-microapp_component").each(function (index) {
+  let loopMode = false;
+  if ($(this).attr("loop-mode") === "true") {
+    loopMode = true;
+  }
+  let sliderDuration = 300;
+  if ($(this).attr("slider-duration") !== undefined) {
+    sliderDuration = +$(this).attr("slider-duration");
+  }
+  const swiper = new Swiper($(this).find(".swiper")[0], {
+    speed: sliderDuration,
+    loop: loopMode,
+    autoHeight: false,
+    centeredSlides: loopMode,
+    followFinger: true,
+    freeMode: false,
+    slideToClickedSlide: false,
+    slidesPerView: 1,
+    spaceBetween: "4%",
+    rewind: false,
+    mousewheel: {
+      forceToAxis: true,
+    },
+    keyboard: {
+      enabled: true,
+      onlyInViewport: true,
+    },
+    breakpoints: {
+      // mobile landscape
+      480: {
+        slidesPerView: 1,
+        spaceBetween: "4%",
+      },
+      // tablet
+      768: {
+        slidesPerView: 2,
+        spaceBetween: "4%",
+      },
+      // desktop
+      992: {
+        slidesPerView: 3,
+        spaceBetween: "2%",
+      },
+    },
+    pagination: {
+      el: $(this).find(".swiper-bullet-wrapper")[0],
+      bulletActiveClass: "is-active",
+      bulletClass: "swiper-bullet",
+      bulletElement: "button",
+      clickable: true,
+    },
+    navigation: {
+      nextEl: $(this).find(".swiper-next")[0],
+      prevEl: $(this).find(".swiper-prev")[0],
+      disabledClass: "is-disabled",
+    },
+    scrollbar: {
+      el: $(this).find(".swiper-drag-wrapper")[0],
+      draggable: true,
+      dragClass: "swiper-drag",
+      snapOnRelease: true,
+    },
+    slideActiveClass: "is-active",
+    slideDuplicateActiveClass: "is-active",
+  });
+});

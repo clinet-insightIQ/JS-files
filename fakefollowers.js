@@ -15,25 +15,16 @@ const Selectors = {
   engagementRate: `[${profilePrefix}=eng-rate]`,
   medianER: `[${profilePrefix}=median-er]`,
   highLowThan: `[${profilePrefix}=higher-lower]`,
-  ERTagBgColor: `[${profilePrefix}=er-tag-bgColor]`,
   followers: `[${profilePrefix}=followers]`,
   avgLikes: `[${profilePrefix}=avg-likes]`,
   avgComments: `[${profilePrefix}=avg-comments]`,
-  TabsWrapper: `[${profilePrefix}=tabs-wrapper]`,
-  ContentWrapperTab1: `[${profilePrefix}=content-wrapper-1]`,
-  ContentWrapperTab2: `[${profilePrefix}=content-wrapper-2]`,
-  ContentWrapperTab3: `[${profilePrefix}=content-wrapper-3]`,
+  realFollowers: `[${profilePrefix}=real-followers]`,
+  influencersFollowers: `[${profilePrefix}=influencers-followers]`,
+  suspiciousFollowers: `[${profilePrefix}=suspicious-followers]`,
+  massFollowers: `[${profilePrefix}=mass-followers]`,
+
   SampleHeader: `[${profilePrefix}=sample-header]`,
-  ContentCardTab1: `[tab-1-item=card]`,
-  ContentCardTab2: `[tab-2-item=card]`,
-  ContentCardTab3: `[tab-3-item=card]`,
-  CardDate: `[card-item=date]`,
-  CardImage: `[card-item=image]`,
-  CardDesc: `[card-item=description]`,
-  CardLikes: `[card-item=likes]`,
-  CardComments: `[card-item=comments]`,
-  CardER: `[card-item=eng-rate]`,
-  CardPP: `[card-item=dp]`,
+
   AutocompleteLoader: `[input-data=loader-dots]`,
   ButtonLoader: `[input-data=btn-loader]`,
   MainLoader: `[input-data=main-loader]`,
@@ -42,8 +33,6 @@ const Selectors = {
   NoProfileData: `[input-data=no-profile-data]`,
   MainHeroSection: `[input-data=main-hero-section]`,
   HeaderUsername: `[profile-data=header-username]`,
-  placeholderTitle: "[profile-data=placeholder-title]",
-  mainSpinner: `[profile-data=main-spinner]`,
 };
 
 let HeadingColor = "#13144d";
@@ -69,9 +58,6 @@ const NoSponsoredContentEle = document.querySelector(
 const SampleHeaderUsernameEle = document.querySelector(
   Selectors.HeaderUsername
 );
-const placeholderTitleEle = document.querySelector(Selectors.placeholderTitle);
-const mainSpinnerEle = document.querySelector(Selectors.mainSpinner);
-const ERTagBgColorEle = document.querySelector(Selectors.ERTagBgColor);
 
 //dropdown list
 const resultList = document.querySelector("[data=result-list]");
@@ -88,7 +74,7 @@ const Search_URL = "https://insightiq-api.nrj.life/search?";
 const fetchResults = debounce(async (req) => {
   const FinalUrl = new URL(Search_URL);
   FinalUrl.searchParams.set("q", req.query);
-  FinalUrl.searchParams.set("p", req.platform || "yt");
+  FinalUrl.searchParams.set("p", req.platform || "it");
 
   try {
     const response = await (
@@ -103,10 +89,10 @@ const fetchResults = debounce(async (req) => {
   }
 }, 500);
 
-const fetchProfileInfo = async (req) => {
-  const profileURL = new URL(`https://insightiq-api.nrj.life/engagement-data`);
+const fetchFakeDataInfo = async (req) => {
+  const profileURL = new URL(`https://insightiq-api.nrj.life/fake-data`);
   profileURL.searchParams.set("h", req.handle);
-  profileURL.searchParams.set("p", req.platform || "yt");
+  //profileURL.searchParams.set("p", req.platform || "it");
 
   let response;
   try {
@@ -132,7 +118,7 @@ const handleTextChange = async (e) => {
   const query = e.target.value;
   const query_input_value = searchInput.value;
   currentHandle = query;
-  console.log("Testing values::", { query, query_input_value });
+  // console.log("Testing values::", { query, query_input_value });
   if (!query || !query.length) {
     autocompleteLoaderEle.style.display = "none";
     resultList.innerHTML = "";
@@ -142,7 +128,7 @@ const handleTextChange = async (e) => {
   fetchResults({
     query,
     onSuccess: (results) => {
-      console.log("Autocomplte values", results);
+      // console.log("Autocomplte values", results);
 
       autocompleteLoaderEle.style.display = "none";
       if (query.length && results && results.data.length) {
@@ -213,137 +199,41 @@ const formatDate = (date = new Date()) => {
 };
 let chart1;
 let chart2;
-//let chart3;
+let chart3;
 const updateGraphs = (graphsData) => {
-  const { latest, top, sponsored } = graphsData;
+  const { followerTypes, followers, likes } = graphsData;
 
-  const latestBarGraph = document.getElementById("bar-chart-latest");
-  const topBarGraph = document.getElementById("bar-chart-top");
-  //const sponsoredBarGraph = document.getElementById("bar-chart-sponsored");
+  const followerTypesGraph = document.getElementById("followers-types");
+  const followersGrowthGraph = document.getElementById("followers-growth");
+  const likesGrowthGraph = document.getElementById("likes-growth");
 
-  if (chart1 && chart2) {
+  if (chart1 && chart2 && chart3) {
     chart1.destroy();
     chart2.destroy();
+    chart3.destroy();
   }
 
-  chart1 = renderBarGraphs({
-    ref: latestBarGraph,
-    yAxisData: latest.engagementRates,
-    xAxisData: latest.publishedDates.map((date) => formatDate(new Date(date))),
+  chart1 = renderDoughnutGraph({
+    ref: followerTypesGraph,
+    data: followerTypes,
   });
-  chart2 = renderBarGraphs({
-    ref: topBarGraph,
-    yAxisData: top.engagementRates,
-    xAxisData: top.publishedDates.map((date) => formatDate(new Date(date))),
+  chart2 = renderLineGraph({
+    ref: followersGrowthGraph,
+    yAxisData: followers.followersCount,
+    xAxisData: followers.months,
+    title: "Monthly trend of total followers",
   });
-  /* chart3 = renderBarGraphs({
-    ref: sponsoredBarGraph,
-    yAxisData: sponsored.engagementRates,
-    xAxisData: sponsored.publishedDates.map((date) =>
-      formatDate(new Date(date))
-    )
-  }); */
+  chart3 = renderLineGraph({
+    ref: likesGrowthGraph,
+    yAxisData: likes.avgLikesCount,
+    xAxisData: likes.months,
+    title: "Monthly trend of average likes per post",
+  });
 };
-
-function replaceImageWithVideo(imageElement, videoEle) {
-  // Select the image element
-  // const imageElement = document.getElementById("imageElement");
-
-  // Create a new video element
-  const videoElement = document.createElement("video");
-  videoElement.src = videoEle.url;
-  videoElement.width = videoEle.width || "300";
-  videoElement.height = videoEle.height || "200";
-  videoElement.className = videoEle.className || "image"; // Apply the same class for styles
-
-  // Replace the image with the video element
-  imageElement.replaceWith(videoElement);
-}
-
-function updateTabContent(tabId, data, profilepicUrl) {
-  let wrapper;
-  let dummyCard;
-
-  const ContentWrapperTab1Ele = document.querySelector(
-    Selectors.ContentWrapperTab1
-  );
-  const ContentWrapperTab2Ele = document.querySelector(
-    Selectors.ContentWrapperTab2
-  );
-  const ContentWrapperTab3Ele = document.querySelector(
-    Selectors.ContentWrapperTab3
-  );
-  const ContentCardTab1Ele = document.querySelector(Selectors.ContentCardTab1);
-  const ContentCardTab2Ele = document.querySelector(Selectors.ContentCardTab2);
-  const ContentCardTab3Ele = document.querySelector(Selectors.ContentCardTab3);
-
-  if (tabId === "top") {
-    wrapper = ContentWrapperTab2Ele;
-    dummyCard = ContentCardTab2Ele;
-  }
-  if (tabId === "latest") {
-    wrapper = ContentWrapperTab1Ele;
-    dummyCard = ContentCardTab1Ele;
-  }
-  if (tabId === "sponsored") {
-    wrapper = ContentWrapperTab3Ele;
-    dummyCard = ContentCardTab3Ele;
-  }
-
-  if (data && data.length) {
-    wrapper.innerHTML = "";
-    data.forEach((eachItem) => {
-      const clonedListItem = dummyCard?.cloneNode(true);
-      //refs
-      if (!clonedListItem) return;
-      const CardProfileEle = clonedListItem.querySelector(Selectors.CardPP);
-      const DateEle = clonedListItem.querySelector(Selectors.CardDate);
-      const ImageEle = clonedListItem.querySelector(Selectors.CardImage);
-      // const videoEle = clonedListItem.querySelector(Selectors.CardVideo)
-      const DescEle = clonedListItem.querySelector(Selectors.CardDesc);
-      const LikesEle = clonedListItem.querySelector(Selectors.CardLikes);
-      const CommentsEle = clonedListItem.querySelector(Selectors.CardComments);
-      const EngEle = clonedListItem.querySelector(Selectors.CardER);
-
-      //updated values
-      CardProfileEle.src = profilepicUrl;
-      CardProfileEle.srcset = "";
-      DateEle.innerText = formatDateTime(new Date(eachItem.published_at));
-
-      console.log("Photo URL set", eachItem.thumbnail_url);
-      if (!eachItem.thumbnail_url) {
-        ImageEle.src = "https://i.stack.imgur.com/drHbk.jpg";
-        ImageEle.srcset = "";
-      } else {
-        ImageEle.src = eachItem.thumbnail_url;
-        // ImageEle.srcset = `${eachItem.thumbnail_url}500w`;
-        ImageEle.srcset = "";
-      }
-
-      DescEle.innerText = eachItem.description;
-      if (eachItem.engagementRate) {
-        EngEle.innerText = `${eachItem.engagementRate?.toFixed(1)}%`;
-      } else {
-        EngEle.parentElement.style.dsiplay = "none";
-      }
-      LikesEle.innerText = eachItem.engagement.like_count || "";
-      CommentsEle.innerText = eachItem.engagement.comment_count || "";
-      clonedListItem.addEventListener("click", () =>
-        window.open(eachItem.url, "blank")
-      );
-      wrapper.appendChild(clonedListItem);
-    });
-  } else {
-    console.log("No sponsored data", NoSponsoredContentEle);
-    wrapper.innerHTML = "";
-    NoSponsoredContentEle.style.display = "flex";
-  }
-}
 
 const updateProfilePage = (results) => {
   NoProfileDateEle.style.display = "none";
   MainHeroSectionEle.style.display = "block";
-  mainSpinnerEle.style.display = "none";
   //basic profile info
   const profilePicEle = document.querySelector(Selectors.profilePicture);
   const profileNameEle = document.querySelector(Selectors.fullname);
@@ -354,14 +244,23 @@ const updateProfilePage = (results) => {
   const popupUsernameEle = document.querySelector(Selectors.popupUsername);
 
   const engRateEle = document.querySelector(Selectors.engagementRate);
-  const engMedianRateEle = document.querySelector(Selectors.medianER);
-  const highLowThanEle = document.querySelector(Selectors.highLowThan);
   const followersEle = document.querySelector(Selectors.followers);
   const avgLikesEle = document.querySelector(Selectors.avgLikes);
-  const avgCommentsEle = document.querySelector(Selectors.avgComments);
+  const realFollowersEle = document.querySelector(Selectors.realFollowers);
+  const influencersFollowersEle = document.querySelector(
+    Selectors.influencersFollowers
+  );
+  const suspiciousFollowersEle = document.querySelector(
+    Selectors.suspiciousFollowers
+  );
+  const massFollowersEle = document.querySelector(Selectors.massFollowers);
+
+  // const engMedianRateEle = document.querySelector(Selectors.medianER);
+  //const highLowThanEle = document.querySelector(Selectors.highLowThan);
+  // const avgCommentsEle = document.querySelector(Selectors.avgComments);
 
   if (results && Object.keys(results).length > 1) {
-    const { profile, stats, posts, graphs } = results;
+    const { profile, stats, followers, growth } = results;
     if (profile) {
       profilePicEle.src = profile.imageUrl;
       profileNameEle.innerText = profile.fullName;
@@ -392,38 +291,36 @@ const updateProfilePage = (results) => {
 
     if (stats) {
       engRateEle.innerText = `${stats.engagementRate}%`;
-      /* engMedianRateEle.innerText = `${Math.abs(stats.medianRate)}%`;
+      /*  engMedianRateEle.innerText = `${Math.abs(stats.medianRate)}%`;
       if (stats.medianRate < 0) {
-        highLowThanEle.innerText = " lower ";
+        highLowThanEle.innerText = "lower ";
       } */
-      highLowThanEle.innerText = "";
-      engMedianRateEle.innerText = `${stats.engagementTag}`;
-      ERTagBgColorEle.style.backgroundColor = `${stats.engTagColor}`;
       followersEle.innerText = stats.followers || "";
       avgLikesEle.innerText = stats.averageLikes || "";
-      avgCommentsEle.innerText = stats.averageComments || "";
+      //avgCommentsEle.innerText = stats.averageComments || "";
     }
 
-    if (posts) {
-      updateTabContent("latest", posts.latestContent, profile.imageUrl);
-      updateTabContent("top", posts.topContent, profile.imageUrl);
-      // updateTabContent("sponsored", posts.sponseredContent, profile.imageUrl);
-      /*   ContentTabsEle.addEventListener("click", (e) => {
-        const currentTab = e.target.innerText;
-        console.log("Tab selected", currentTab);
-      }); */
+    if (followers) {
+      realFollowersEle.innerText = `${followers.real}%`;
+      influencersFollowersEle.innerText = `${followers.influencers}%`;
+      suspiciousFollowersEle.innerText = `${followers.suspicious}%`;
+      massFollowersEle.innerText = `${followers.massFollowers}%`;
     }
 
-    if (graphs) {
-      updateGraphs(graphs);
+    if (growth) {
+      let graphData = {
+        followerTypes: Object.values(followers).map(parseFloat),
+        followers: growth.followers,
+        likes: growth.likes,
+      };
+      updateGraphs(graphData);
     }
   } else {
-    console.log("Show Error Toast");
-    SampleHeaderUsernameEle.style.color = UsernameColor;
-    SampleHeaderUsernameEle.innerText = `@${currentHandle}`;
+    // console.log("Show Error Toast");
+    // SampleHeaderUsernameEle.style.color = UsernameColor;
+    // SampleHeaderUsernameEle.innerText = `@${currentHandle}`;
     MainHeroSectionEle.style.display = "none";
     NoProfileDateEle.style.display = "flex";
-    mainSpinnerEle.style.display = "none";
   }
 };
 
@@ -439,12 +336,10 @@ const handleUsernameSubmit = async (e) => {
     buttonLoaderEle.style.display = "none";
     return;
   }
-  console.log("Curren Username", currentHandle);
+  //console.log("Curren Username", currentHandle);
 
-  const results = await fetchProfileInfo({ handle: currentHandle });
+  const results = await fetchFakeDataInfo({ handle: currentHandle });
   //console.log("Profile Data:", results);
-
-  placeholderTitleEle.style.opacity = 1;
 
   //<!--- update UI --->
   updateProfilePage(results);
@@ -453,9 +348,9 @@ const handleUsernameSubmit = async (e) => {
 
   //<!--- Hide header only if there's a profile param
   if (window.location.href.includes("profile")) {
-    SampleHeaderEle.innerText = `${HeaderTitle} `;
-    SampleHeaderUsernameEle.style.color = UsernameColor;
-    SampleHeaderUsernameEle.innerText = `@${currentHandle}`;
+    //SampleHeaderEle.innerText = `${HeaderTitle} `;
+    // SampleHeaderUsernameEle.style.color = UsernameColor;
+    // SampleHeaderUsernameEle.innerText = `@${currentHandle}`;
   }
 };
 
@@ -509,7 +404,7 @@ window.addEventListener("load", (ev) => {
 
   //opacity zero if no params exists
   if (!userhandle) {
-    updateAppState("mrbeast");
+    updateAppState("emmachamberlain");
   }
 });
 
@@ -524,31 +419,32 @@ function debounce(cb, delay = 300) {
   };
 }
 
-function renderBarGraphs(graphData) {
-  console.log("XAxis data:", graphData.xAxisData);
-  const xAxisData = graphData.xAxisData?.map((date) => {
-    const [day, month, year] = date.split("-");
-    return `${day} ${month} '${year}`;
-  });
+function renderDoughnutGraph(graphData) {
+  console.log("XAxis data:", graphData);
 
   return new window.Chart(graphData.ref, {
-    type: "bar",
+    type: "doughnut",
     data: {
-      labels: xAxisData,
+      labels: ["Real", "Influencers", "Suspicious", "Mass followers"],
       datasets: [
         {
-          // label: "Date Posted",
-          backgroundColor: new Array(10).fill("#00D176"),
-          data: graphData.yAxisData,
+          // label: "My First Dataset",
+          data: graphData.data,
+          backgroundColor: ["#00C65F", "#680DE4", "#D91D4A", "#B3F001"],
+          hoverOffset: 4,
+          spacing: 5,
+          borderRadius: 10,
+          rotation: 180,
         },
       ],
     },
     options: {
+      cutout: 160,
       plugins: {
         tooltip: {
           enabled: true,
           displayColors: false,
-          callbacks: {
+          /* callbacks: {
             title: function (tooltipItem) {
               return "";
             },
@@ -556,29 +452,85 @@ function renderBarGraphs(graphData) {
               let label = "";
 
               if (context.parsed.y !== null) {
-                const parsedValue =
-                  context.parsed.y < 0.01
-                    ? context.parsed.y?.toFixed(3)
-                    : context.parsed.y?.toFixed(2);
-                label += `${parsedValue}%`;
-                console.log("Label>>", label);
+                label += `${context.parsed.y?.toFixed(2)}%`;
               }
               return label;
-            },
-          },
+            }
+          } */
         },
 
         legend: { display: false },
         responsive: true,
-        title: {
-          display: true,
-          text: "Date Posted",
-          position: "bottom",
-          font: {
-            weight: 700,
-            size: 14,
-          },
+      },
+      scales: {
+        y: {
+          display: false,
         },
+        x: {
+          display: false,
+        },
+      },
+      animation: false,
+    },
+  });
+}
+
+function renderLineGraph(graphData) {
+  console.log("XAxis data:", graphData);
+  const formattedMonths = graphData.xAxisData.map((date) => {
+    const dateObj = new Date(`${date}-01`);
+    const formatedDate = formatDate(dateObj);
+    console.log("<<Formated date >>", formatedDate);
+    const [day, month, year] = formatedDate.split("-");
+    return `${month} '${year}`;
+  });
+
+  return new window.Chart(graphData.ref, {
+    type: "line",
+    data: {
+      labels: formattedMonths,
+      datasets: [
+        {
+          // label: "My First Dataset",
+          data: graphData.yAxisData,
+          backgroundColor: "#680DE4",
+          borderWidth: 2,
+          borderColor: "#680DE4",
+          pointRadius: 0,
+        },
+      ],
+    },
+    options: {
+      title: {
+        display: true,
+        text: graphData.title,
+        position: "top",
+        font: {
+          weight: 700,
+          size: 14,
+        },
+      },
+      plugins: {
+        tooltip: {
+          enabled: true,
+          displayColors: false,
+          /* callbacks: {
+            title: function (tooltipItem) {
+              return "";
+            },
+            label: function (context) {
+              let label = "";
+
+              if (context.parsed.y !== null) {
+                label += `${context.parsed.y?.toFixed(2)}%`;
+              }
+              return label;
+            }
+          } */
+        },
+
+        legend: { display: false },
+        responsive: true,
       },
       scales: {
         y: {
@@ -593,7 +545,7 @@ function renderBarGraphs(graphData) {
             },
             callback: function (value, index, values) {
               // Your custom formatting logic for y-axis labels
-              return value + "%"; // Example formatting
+              return largeNumberFormatter(value); // Example formatting
             },
           },
         },
@@ -614,70 +566,12 @@ function renderBarGraphs(graphData) {
   });
 }
 
-//swipper initialization
-$(".slider-microapp_component").each(function (index) {
-  let loopMode = false;
-  if ($(this).attr("loop-mode") === "true") {
-    loopMode = true;
-  }
-  let sliderDuration = 300;
-  if ($(this).attr("slider-duration") !== undefined) {
-    sliderDuration = +$(this).attr("slider-duration");
-  }
-  const swiper = new Swiper($(this).find(".swiper")[0], {
-    speed: sliderDuration,
-    loop: loopMode,
-    autoHeight: false,
-    centeredSlides: loopMode,
-    followFinger: true,
-    freeMode: false,
-    slideToClickedSlide: false,
-    slidesPerView: 1,
-    spaceBetween: "4%",
-    rewind: false,
-    mousewheel: {
-      forceToAxis: true,
-    },
-    keyboard: {
-      enabled: true,
-      onlyInViewport: true,
-    },
-    breakpoints: {
-      // mobile landscape
-      480: {
-        slidesPerView: 1,
-        spaceBetween: "4%",
-      },
-      // tablet
-      768: {
-        slidesPerView: 2,
-        spaceBetween: "4%",
-      },
-      // desktop
-      992: {
-        slidesPerView: 3,
-        spaceBetween: "2%",
-      },
-    },
-    pagination: {
-      el: $(this).find(".swiper-bullet-wrapper")[0],
-      bulletActiveClass: "is-active",
-      bulletClass: "swiper-bullet",
-      bulletElement: "button",
-      clickable: true,
-    },
-    navigation: {
-      nextEl: $(this).find(".swiper-next")[0],
-      prevEl: $(this).find(".swiper-prev")[0],
-      disabledClass: "is-disabled",
-    },
-    scrollbar: {
-      el: $(this).find(".swiper-drag-wrapper")[0],
-      draggable: true,
-      dragClass: "swiper-drag",
-      snapOnRelease: true,
-    },
-    slideActiveClass: "is-active",
-    slideDuplicateActiveClass: "is-active",
-  });
-});
+const largeNumberFormatter = (value) => {
+  if (!value) return;
+  let formatter = Intl.NumberFormat("en", { notation: "compact" });
+  // example 1
+  let formattedValue = formatter.format(value);
+  // print
+  //console.log(`Before:${value}  and after values: ${formattedValue} >>> `);
+  return formattedValue;
+};
