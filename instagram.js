@@ -2,7 +2,8 @@
 
 console.log("working!!!");
 
-let profilePrefix = `profile-data`;
+const profilePrefix = `profile-data`;
+
 const Selectors = {
   profilePicture: `[${profilePrefix}=profile-picture]`,
   fullname: `[${profilePrefix}=fullname]`,
@@ -41,10 +42,10 @@ const Selectors = {
   NoSponsoredContent: `[input-data=no-sponsored-content]`,
   NoProfileData: `[input-data=no-profile-data]`,
   MainHeroSection: `[input-data=main-hero-section]`,
-  HeaderUsername: `[profile-data=header-username]`,
-  placeholderTitle: "[profile-data=placeholder-title]",
-  mainSpinner: `[profile-data=main-spinner]`,
-  analyseProfile: `[profile-data=analyze-full-profile]`,
+  HeaderUsername: `[${profilePrefix}=header-username]`,
+  placeholderTitle: `[${profilePrefix}=placeholder-title]`,
+  mainSpinner: `[${profilePrefix}=main-spinner]`,
+  analyseProfile: `[${profilePrefix}=analyze-full-profile]`,
 };
 
 let HeadingColor = "#13144d";
@@ -92,6 +93,11 @@ const fetchResults = debounce(async (req) => {
   FinalUrl.searchParams.set("q", req.query);
   FinalUrl.searchParams.set("p", req.platform || "it");
 
+  TrackEvent(EventNames.erUserNameEntered, {
+    username: req.query,
+    platform_name: "instagram",
+  });
+
   try {
     const response = await (
       await fetch(FinalUrl, {
@@ -109,10 +115,6 @@ const fetchProfileInfo = async (req) => {
   const profileURL = new URL(`https://insightiq-api.nrj.life/engagement-data`);
   profileURL.searchParams.set("h", req.handle);
   profileURL.searchParams.set("p", req.platform || "it");
-  TrackEvent(EventNames.erUserNameEntered, {
-    username: query,
-    platform_name: "instagram",
-  });
 
   let response;
   try {

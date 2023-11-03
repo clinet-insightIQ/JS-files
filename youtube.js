@@ -44,6 +44,7 @@ const Selectors = {
   HeaderUsername: `[profile-data=header-username]`,
   placeholderTitle: "[profile-data=placeholder-title]",
   mainSpinner: `[profile-data=main-spinner]`,
+  analyseProfile: `[profile-data=analyze-full-profile]`,
 };
 
 let HeadingColor = "#13144d";
@@ -72,6 +73,7 @@ const SampleHeaderUsernameEle = document.querySelector(
 const placeholderTitleEle = document.querySelector(Selectors.placeholderTitle);
 const mainSpinnerEle = document.querySelector(Selectors.mainSpinner);
 const ERTagBgColorEle = document.querySelector(Selectors.ERTagBgColor);
+const analyseProfileButton = document.querySelector(Selectors.analyseProfile);
 
 //dropdown list
 const resultList = document.querySelector("[data=result-list]");
@@ -91,7 +93,7 @@ const fetchResults = debounce(async (req) => {
   FinalUrl.searchParams.set("p", req.platform || "yt");
 
   TrackEvent(EventNames.erUserNameEntered, {
-    username: query,
+    username: req.query,
     platform_name: "youtube",
   });
 
@@ -319,7 +321,7 @@ function updateTabContent(tabId, data, profilepicUrl) {
       CardProfileEle.srcset = "";
       DateEle.innerText = formatDateTime(new Date(eachItem.published_at));
 
-      console.log("Photo URL set", eachItem.thumbnail_url);
+      // console.log("Photo URL set", eachItem.thumbnail_url);
       if (!eachItem.thumbnail_url) {
         ImageEle.src = "https://i.stack.imgur.com/drHbk.jpg";
         ImageEle.srcset = "";
@@ -411,10 +413,12 @@ const updateProfilePage = (results) => {
       followersEle.innerText = stats.followers || "";
       avgLikesEle.innerText = stats.averageLikes || "";
       avgCommentsEle.innerText = stats.averageComments || "";
-      TrackEvent(EventNames.erContentTag, {
-        username: profile.username,
-        platform_name: "youtube",
-        er_value: stats.engagementTag,
+      ERTagBgColorEle.addEventListener("click", () => {
+        TrackEvent(EventNames.erContentTag, {
+          username: profile.username,
+          platform_name: "youtube",
+          er_value: stats.engagementTag,
+        });
       });
     }
 
@@ -546,7 +550,7 @@ function debounce(cb, delay = 300) {
 }
 
 function renderBarGraphs(graphData) {
-  console.log("XAxis data:", graphData.xAxisData);
+  //console.log("XAxis data:", graphData.xAxisData);
   const xAxisData = graphData.xAxisData?.map((date) => {
     const [day, month, year] = date.split("-");
     return `${day} ${month} '${year}`;

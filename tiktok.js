@@ -92,7 +92,7 @@ const fetchResults = debounce(async (req) => {
   FinalUrl.searchParams.set("p", req.platform || "tt");
 
   TrackEvent(EventNames.erUserNameEntered, {
-    username: query,
+    username: req.query,
     platform_name: "tiktok",
   });
 
@@ -320,7 +320,7 @@ function updateTabContent(tabId, data, profilepicUrl) {
       CardProfileEle.srcset = "";
       DateEle.innerText = formatDateTime(new Date(eachItem.published_at));
 
-      console.log("Photo URL set", eachItem.thumbnail_url);
+      // console.log("Photo URL set", eachItem.thumbnail_url);
       if (!eachItem.thumbnail_url) {
         ImageEle.src = "https://i.stack.imgur.com/drHbk.jpg";
         ImageEle.srcset = "";
@@ -413,10 +413,12 @@ const updateProfilePage = (results) => {
       followersEle.innerText = stats.followers || "";
       avgLikesEle.innerText = stats.averageLikes || "";
       avgCommentsEle.innerText = stats.averageComments || "";
-      TrackEvent(EventNames.erContentTag, {
-        username: profile.username,
-        platform_name: "tiktok",
-        er_value: stats.engagementTag,
+      ERTagBgColorEle.addEventListener("click", () => {
+        TrackEvent(EventNames.erContentTag, {
+          username: profile.username,
+          platform_name: "tiktok",
+          er_value: stats.engagementTag,
+        });
       });
     }
 
@@ -554,7 +556,7 @@ function debounce(cb, delay = 300) {
 }
 
 function renderBarGraphs(graphData) {
-  console.log("XAxis data:", graphData.xAxisData);
+  //console.log("XAxis data:", graphData.xAxisData);
   const xAxisData = graphData.xAxisData?.map((date) => {
     const [day, month, year] = date.split("-");
     return `${day} ${month} '${year}`;
