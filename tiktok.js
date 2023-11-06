@@ -510,8 +510,8 @@ const updateAppState = (username) => {
 };
 
 searchInput.addEventListener("input", handleTextChange);
-submitButton.addEventListener("click", () => {
-  handleUsernameSubmit();
+submitButton.addEventListener("click", (e) => {
+  handleUsernameSubmit(e);
   TrackEvent(EventNames.erCheckProfileClicked, {
     username: currentHandle,
     platform_name: "tiktok",

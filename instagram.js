@@ -512,12 +512,13 @@ const updateAppState = (username) => {
 };
 
 searchInput.addEventListener("input", handleTextChange);
-submitButton.addEventListener("click", () => {
+submitButton.addEventListener("click", (e) => {
+  e?.preventDefault();
   TrackEvent(EventNames.erCheckProfileClicked, {
     username: currentHandle,
     platform_name: "instagram",
   });
-  handleUsernameSubmit();
+  handleUsernameSubmit(e);
 });
 HeroAreaEle.addEventListener("click", (e) => {
   if (resultList.hasChildNodes) {

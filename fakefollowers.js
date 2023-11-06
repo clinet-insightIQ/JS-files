@@ -36,6 +36,7 @@ const Selectors = {
   HeaderUsername: `[profile-data=header-username]`,
   placeholderTitle: "[profile-data=placeholder-title]",
   mainSpinner: `[profile-data=main-spinner]`,
+  analyseProfile: `[${profilePrefix}=analyze-full-profile]`,
 };
 
 let HeadingColor = "#13144d";
@@ -65,6 +66,7 @@ const SampleHeaderUsernameEle = document.querySelector(
 const fakeFollowersEle = document.querySelector(Selectors.fakeFollowers);
 const placeholderTitleEle = document.querySelector(Selectors.placeholderTitle);
 const mainSpinnerEle = document.querySelector(Selectors.mainSpinner);
+const analyseProfileButton = document.querySelector(Selectors.analyseProfile);
 
 //dropdown list
 const resultList = document.querySelector("[data=result-list]");
@@ -83,6 +85,11 @@ const fetchResults = debounce(async (req) => {
   FinalUrl.searchParams.set("q", req.query);
   FinalUrl.searchParams.set("p", req.platform || "it");
   FinalUrl.searchParams.set("sf", "ff");
+
+  TrackEvent(EventNames.ffUserNameEntered, {
+    username: req.query,
+    platform_name: "instagram",
+  });
 
   try {
     const response = await (
@@ -165,6 +172,10 @@ const handleTextChange = async (e) => {
             resultList.style.display = "none";
             updateBrowserUrl();
             handleUsernameSubmit();
+            TrackEvent(EventNames.ffProfileSelected, {
+              username: profile.username,
+              platform_name: "instagram",
+            });
           });
 
           resultList.appendChild(cloneListItem);
@@ -400,11 +411,24 @@ const updateAppState = (username) => {
 };
 
 searchInput.addEventListener("input", handleTextChange);
-submitButton.addEventListener("click", handleUsernameSubmit);
+submitButton.addEventListener("click", (e) => {
+  e?.preventDefault();
+  TrackEvent(EventNames.ffCheckProfileClicked, {
+    username: currentHandle,
+    platform_name: "instagram",
+  });
+  handleUsernameSubmit(e);
+});
 HeroAreaEle.addEventListener("click", (e) => {
   if (resultList.hasChildNodes) {
     resultList.style.display = "none";
   }
+});
+analyseProfileButton.addEventListener("click", () => {
+  TrackEvent(EventNames.ffFullProfile, {
+    username: currentHandle,
+    platform_name: "instagram",
+  });
 });
 window.addEventListener("load", (ev) => {
   const url = new URL(window.location.href);
@@ -419,6 +443,25 @@ window.addEventListener("load", (ev) => {
     updateAppState("emmachamberlain");
   }
 });
+
+//init mixpanel
+window.mixpanel.init("57d1ea6085714f5117a2c1bd6b2615c2", {
+  debug: true,
+  track_pageview: true,
+  persistence: "localStorage",
+});
+
+const EventNames = {
+  ffUserNameEntered: "FF_USERNAME_ENTERED",
+  ffCheckProfileClicked: "FF_CHECK_PROFILE_CLICKED",
+  ffFullProfile: "FF_FULL_PROFILE_ANALYSED",
+  ffContentTag: "FF_ENGAGEMENT_CONTENT_TAG_CLICKED",
+  ffProfileSelected: "FF_PROFILE_SELECTED",
+};
+
+const TrackEvent = (eventName, properties) => {
+  window.mixpanel.track(eventName, properties);
+};
 
 function debounce(cb, delay = 300) {
   let timeout;
