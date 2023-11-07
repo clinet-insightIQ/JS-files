@@ -475,7 +475,7 @@ function debounce(cb, delay = 300) {
 }
 
 function renderDoughnutGraph(graphData) {
-  console.log("XAxis data:", graphData);
+  // console.log("XAxis data:", graphData);
 
   return new window.Chart(graphData.ref, {
     type: "doughnut",
@@ -494,7 +494,7 @@ function renderDoughnutGraph(graphData) {
       ],
     },
     options: {
-      cutout: 160,
+      cutout: 115,
       plugins: {
         tooltip: {
           enabled: true,
@@ -531,11 +531,11 @@ function renderDoughnutGraph(graphData) {
 }
 
 function renderLineGraph(graphData) {
-  console.log("XAxis data:", graphData);
+  // console.log("XAxis data:", graphData);
   const formattedMonths = graphData.xAxisData.map((date) => {
     const dateObj = new Date(`${date}-01`);
     const formatedDate = formatDate(dateObj);
-    console.log("<<Formated date >>", formatedDate);
+    // console.log("<<Formated date >>", formatedDate);
     const [day, month, year] = formatedDate.split("-");
     return `${month} '${year}`;
   });
@@ -553,6 +553,7 @@ function renderLineGraph(graphData) {
           borderColor: "#680DE4",
           pointRadius: 2,
           pointBorderColor: "#680DE4",
+          stepSize: 2,
         },
       ],
     },
@@ -594,10 +595,11 @@ function renderLineGraph(graphData) {
             dash: [5, 5], // An array defining the line style (e.g., [dash length, gap length])
           },
           ticks: {
+            autoSkipPadding: 20,
             color: "#333",
             font: {
-              weight: 700,
-              // size: 14
+              weight: 500,
+              size: 14,
             },
             callback: function (value, index, values) {
               // Your custom formatting logic for y-axis labels
@@ -610,9 +612,11 @@ function renderLineGraph(graphData) {
             display: false,
           },
           ticks: {
+            autoSkipPadding: 20,
+            color: "#333",
             font: {
-              weight: 700,
-              //size: 14
+              weight: 500,
+              size: 14,
             },
           },
         },
