@@ -8,6 +8,8 @@ const Selectors = {
   fullname: `[${profilePrefix}=fullname]`,
   username: `[${profilePrefix}=username]`,
   profileLink: `[${profilePrefix}=profile-link]`,
+  getContactDetails: `[${profilePrefix}=get-contact-details]`,
+  checkForFreeBtn: `[${profilePrefix}=check-for-free-btn]`,
   profileVerified: `[${profilePrefix}=is-verified]`,
   profileCopyLink: `[${profilePrefix}=copy-link]`,
   popupImage: `[${profilePrefix}=popup-image]`,
@@ -75,6 +77,11 @@ const listItemImgAttr = "[data=item-image]";
 const listItemNameAttr = "[data=list-item-name]";
 const listItemUsernameAttr = "[data=list-item-username]";
 const listItemIsVerifiedAttr = "[data=item-is-verified]";
+
+const getContactDetailsEle = document.querySelector(
+  Selectors.getContactDetails
+);
+const checkForFreeBtn = document.querySelector(Selectors.checkForFreeBtn);
 
 //const loaderEle = document.querySelector("[data=loader]");
 
@@ -306,6 +313,10 @@ const updateProfilePage = (results) => {
             copyLinkEle.innerText = "Failed to Copy!";
           }
         );
+        TrackEvent(EventNames.ffProfileShared, {
+          username: currentHandle,
+          platform_name: "instagram",
+        });
       });
     }
 
@@ -425,11 +436,26 @@ HeroAreaEle.addEventListener("click", (e) => {
   }
 });
 analyseProfileButton.addEventListener("click", () => {
-  TrackEvent(EventNames.ffFullProfile, {
+  /* TrackEvent(EventNames.ffFullProfile, {
+    username: currentHandle,
+    platform_name: "instagram",
+  });*/
+});
+
+getContactDetailsEle.addEventListener("click", () => {
+  TrackEvent(EventNames.ffContactButtonClicked, {
     username: currentHandle,
     platform_name: "instagram",
   });
 });
+
+checkForFreeBtn.addEventListener("click", () => {
+  TrackEvent(EventNames.ffCheckForFree, {
+    username: currentHandle,
+    platform_name: "instagram",
+  });
+});
+
 window.addEventListener("load", (ev) => {
   const url = new URL(window.location.href);
   const userhandle = url.searchParams.get("profile");
@@ -454,9 +480,12 @@ window.mixpanel.init("57d1ea6085714f5117a2c1bd6b2615c2", {
 const EventNames = {
   ffUserNameEntered: "FF_USERNAME_ENTERED",
   ffCheckProfileClicked: "FF_CHECK_PROFILE_CLICKED",
-  ffFullProfile: "FF_FULL_PROFILE_ANALYSED",
+  //ffFullProfile: "FF_FULL_PROFILE_ANALYSED",
   ffContentTag: "FF_ENGAGEMENT_CONTENT_TAG_CLICKED",
   ffProfileSelected: "FF_PROFILE_SELECTED",
+  ffProfileShared: "FF_PROFILE_SHARED",
+  ffContactButtonClicked: "FF_CONTACT_BUTTON_CLICK",
+  ffCheckForFree: "FF_CHECK_FREE",
 };
 
 const TrackEvent = (eventName, properties) => {
