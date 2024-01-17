@@ -18,6 +18,7 @@ const Selectors = {
   medianER: `[${profilePrefix}=median-er]`,
   highLowThan: `[${profilePrefix}=higher-lower]`,
   fakeFollowers: `[${profilePrefix}=fakeFollowers]`,
+  realFollowersPP: `[${profilePrefix}=real-followers-count]`,
   followers: `[${profilePrefix}=followers]`,
   avgLikes: `[${profilePrefix}=avg-likes]`,
   avgComments: `[${profilePrefix}=avg-comments]`,
@@ -69,6 +70,7 @@ const fakeFollowersEle = document.querySelector(Selectors.fakeFollowers);
 const placeholderTitleEle = document.querySelector(Selectors.placeholderTitle);
 const mainSpinnerEle = document.querySelector(Selectors.mainSpinner);
 const analyseProfileButton = document.querySelector(Selectors.analyseProfile);
+const realFollowersPPEle = document.querySelector(Selectors.realFollowersPP);
 
 //dropdown list
 const resultList = document.querySelector("[data=result-list]");
@@ -334,6 +336,7 @@ const updateProfilePage = (results) => {
 
     if (followers) {
       realFollowersEle.innerText = `${followers.real}%`;
+      realFollowersPPEle.innerText = `${followers.real}`;
       influencersFollowersEle.innerText = `${followers.influencers}%`;
       suspiciousFollowersEle.innerText = `${followers.suspicious}%`;
       massFollowersEle.innerText = `${followers.massFollowers}%`;
