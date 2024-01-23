@@ -308,7 +308,7 @@ const updateProfilePage = (results) => {
           () => {
             copyLinkEle.innerText = "Copied!";
             setTimeout(() => {
-              copyLinkEle.innerText = "Copy profile link";
+              copyLinkEle.innerText = "Share profile analysis";
             }, 1500);
           },
           () => {
@@ -365,7 +365,7 @@ const handleUsernameSubmit = async (e) => {
   submitButton.style.color = HeadingColor;
   buttonLoaderEle.style.display = "block";
   resultList.innerHTML = "";
-  copyLinkEle.innerText = "Copy profile link";
+  copyLinkEle.innerText = "Share profile analysis";
 
   if (!currentHandle || !currentHandle.length) {
     submitButton.style.color = TextColorWhite;
@@ -438,12 +438,12 @@ HeroAreaEle.addEventListener("click", (e) => {
     resultList.style.display = "none";
   }
 });
-analyseProfileButton.addEventListener("click", () => {
-  /* TrackEvent(EventNames.ffFullProfile, {
+/* analyseProfileButton.addEventListener("click", () => {
+   TrackEvent(EventNames.ffFullProfile, {
     username: currentHandle,
     platform_name: "instagram",
-  });*/
-});
+  });
+}); */
 
 getContactDetailsEle.addEventListener("click", () => {
   TrackEvent(EventNames.ffContactButtonClicked, {
