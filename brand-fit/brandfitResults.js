@@ -31,7 +31,7 @@ const setInnerText = (ref, text) => {
 selectors.brandPopup = getElement(`[${prefix[1]}=brandPopup]`);
 //profile elements
 selectors.userName = getElement(`[${prefix[1]}=username]`);
-selector.mUsername = getElement(`[${prefix[1]}=m-username]`);
+selectors.mUsername = getElement(`[${prefix[1]}=m-username]`);
 selectors.mUserhandle = getElement(`[${prefix[1]}=m-userhandle]`);
 selectors.brandName = getElement(`[${prefix[1]}=brandname]`);
 selectors.mBrandname = getElement(`[${prefix[1]}=m-brandname]`);
