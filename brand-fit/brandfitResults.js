@@ -156,7 +156,10 @@ const updateReportPage = (reportDetails) => {
     reportDetails?.brandProfileData?.userhandle
   );
   setInnerText(selectors.mBrandname, reportDetails?.brandProfileData?.username);
-  setInnerText(selectors.mBrandhandle, brandProfileData?.userhandle);
+  setInnerText(
+    selectors.mBrandhandle,
+    reportDetails?.brandProfileData?.userhandle
+  );
   setInnerText(
     selectors.brandFollowersCount,
     reportDetails?.brandProfileData?.followers
