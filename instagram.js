@@ -464,7 +464,7 @@ const handleUsernameSubmit = async (e) => {
 
   const results = await fetchProfileInfo({ handle: currentHandle });
   //console.log("Profile Data:", results);
-  placeholderTitleEle.style.opacity = 1;
+  placeholderTitleEle?.style?.opacity = 1;
   //<!--- update UI --->
   updateProfilePage(results);
   buttonLoaderEle.style.display = "none";
