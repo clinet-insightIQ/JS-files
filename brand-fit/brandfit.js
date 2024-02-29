@@ -205,7 +205,7 @@ const fetchAutocompleteResults = debounce(async (req) => {
   }
 }, 500);
 
-const handleTextChange = async (e, autocompleteLoaderEle) => {
+const handleTextChange = async (e, autocompleteLoaderEle, resultList) => {
   autocompleteLoaderEle.style.display = "block";
   //if (timeId) clearTimeout(timeId);
   const query = e.target.value;
@@ -312,12 +312,14 @@ selectors.popupTileTwoEle = getElement(`[${prefix[3]}=title-3]`);
 //const autocompleteLoaderEle = getElement() || {};
 
 const resultList = document.querySelector("[data=result-list]");
+const resultList2 = document.querySelector("[data=result-list-1");
 const listItem = document.querySelector("[data=list-item]");
 const listItemImgAttr = "[data=item-image]";
 const listItemNameAttr = "[data=list-item-name]";
 const listItemUsernameAttr = "[data=list-item-username]";
 const listItemIsVerifiedAttr = "[data=item-is-verified]";
 
+const mainWrapperEle = getElement(`[${prefix[1]}=main-wrapper]`);
 selectors.brandnameLoader = getElement(`[${prefix[0]}=loader-dots-brandname]`);
 selectors.usernameLoader = getElement(`[${prefix[0]}=loader-dots-username]`);
 selectors.submitBtnLoader = getElement(`[${prefix[0]}=loader-submit]`);
@@ -336,16 +338,21 @@ selectors.checkAllInterests.addEventListener("click", () => {
   setInnerText(selectors.popupTileTwoEle, "All other interests");
 });
 
+mainWrapperEle.addEventListener("click", () => {
+  resultList.innerHTML = "";
+  resultList2.innerHTML = "";
+});
+
 //input change
 selectors.userNameInput = getElement(
   `[${prefix[0]}=username]`
 ).addEventListener("input", (e) =>
-  handleTextChange(e, selectors.usernameLoader)
+  handleTextChange(e, selectors.usernameLoader, resultList2)
 );
 selectors.brandNameInput = getElement(
   `[${prefix[0]}=brandname]`
 ).addEventListener("input", (e) =>
-  handleTextChange(e, selectors.brandnameLoader)
+  handleTextChange(e, selectors.brandnameLoader, resultList)
 );
 
 //action buttons
