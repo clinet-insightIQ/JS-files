@@ -96,6 +96,19 @@ const formSubmit = async (e) => {
   const data = await requestForReport();
   selectors.submitBtnLoader.style.display = "none";
   selectors.submitBtn.value = "Submit";
+  //invalid business email show error label
+  if (
+    data?.status === 400 &&
+    data?.statusText.includes("Invalid buisness email")
+  ) {
+    //show error
+    console.log("email error label");
+    selectors.emailErrorLabel.style.display = "block";
+
+    return;
+  }
+
+  //maximum request reached show error popup
   selectors.popupForm.style.display = "none";
   if (data?.status === 400 && data?.statusText.includes("Max Limit")) {
     //show error
@@ -119,16 +132,6 @@ const formSubmit = async (e) => {
 
 const appendInstaUrl = (instahandle) => {
   return `https://instagram.com/${instahandle}`;
-};
-
-const isDisposableEmail = async (email) => {
-  if (!email) return false;
-  const response = await fetch(`https://api.mailcheck.ai/email/${email}`);
-  if (response.ok) {
-    const parsedRes = await response.json();
-    if (parsedRes.status === 200 && parsedRes.disposable) return true;
-  }
-  return false;
 };
 
 const requestForReport = async () => {
@@ -266,7 +269,7 @@ const handleTextChange = async (e, autocompleteLoaderEle) => {
 
 const selectors = {};
 let currentHandle = null;
-const prefix = ["form-input", "page-item", "data"];
+const prefix = ["form-input", "page-item", "data", "popup-item"];
 const getElement = (selector) => document.querySelector(selector);
 const getValue = (selector) => {
   return getElement(selector)?.value;
@@ -299,6 +302,11 @@ selectors.usernameErrorLabel = getElement(
 );
 selectors.nameErrorLabel = getElement(`[${prefix[1]}=name-error-label]`);
 selectors.emailErrorLabel = getElement(`[${prefix[1]}=email-error-label]`);
+selectors.checkAllEmotions = getElement(`[${prefix[1]}=emotions-checkAll]`);
+selectors.checkAllInterests = getElement(`[${prefix[1]}=interest-checkAll]`);
+selectors.popupTitleEle = getElement(`[${prefix[3]}="main-title"]`);
+selectors.popupTileOneEle = getElement(`[${prefix[3]}=title-2]`);
+selectors.popupTileTwoEle = getElement(`[${prefix[3]}=title-3]`);
 
 //TODO: add loader
 //const autocompleteLoaderEle = getElement() || {};
@@ -315,6 +323,18 @@ selectors.usernameLoader = getElement(`[${prefix[0]}=loader-dots-username]`);
 selectors.submitBtnLoader = getElement(`[${prefix[0]}=loader-submit]`);
 selectors.submitBtn = getElement(`[${prefix[0]}=submitBtn]`);
 selectors.popupForm = getElement(`[${prefix[1]}=second-form]`);
+
+selectors.checkAllEmotions.addEventListener("click", () => {
+  setInnerText(selectors.popupTitleEle, "All emotions");
+  setInnerText(selectors.popupTileOneEle, "Shared emotions");
+  setInnerText(selectors.popupTileTwoEle, "All other emotions");
+});
+
+selectors.checkAllInterests.addEventListener("click", () => {
+  setInnerText(selectors.popupTitleEle, "All interests");
+  setInnerText(selectors.popupTileOneEle, "Shared interests");
+  setInnerText(selectors.popupTileTwoEle, "All other interests");
+});
 
 //input change
 selectors.userNameInput = getElement(
@@ -335,3 +355,47 @@ selectors.analyzeBtnClick = getElement(
 selectors.submitBtnClick = getElement(
   `[${prefix[0]}=submitBtn]`
 )?.addEventListener("click", formSubmit);
+
+const emotions = [
+  "Admiration",
+  "Excitement",
+  "Disapproval",
+  "Caring",
+  "Confusion",
+  "Optimism",
+  "Disappointment",
+  "Fear",
+  "Surprise",
+  "Neutral",
+];
+
+const interests = [
+  { name: "Television & Film" },
+  { name: "Music" },
+  { name: "Shopping & Retail" },
+  { name: "Coffee, Tea & Beverages" },
+  { name: "Camera & Photography" },
+  { name: "Clothes, Shoes, Handbags & Accessories" },
+  { name: "Beer, Wine & Spirits" },
+  { name: "Sports" },
+  { name: "Electronics & Computers" },
+  { name: "Gaming" },
+  { name: "Activewear" },
+  { name: "Art & Design" },
+  { name: "Travel, Tourism & Aviation" },
+  { name: "Business & Careers" },
+  { name: "Beauty & Cosmetics" },
+  { name: "Healthcare & Medicine" },
+  { name: "Jewellery & Watches" },
+  { name: "Restaurants, Food & Grocery" },
+  { name: "Toys, Children & Baby" },
+  { name: "Fitness & Yoga" },
+  { name: "Wedding" },
+  { name: "Tobacco & Smoking" },
+  { name: "Pets" },
+  { name: "Healthy Lifestyle" },
+  { name: "Luxury Goods" },
+  { name: "Home Decor, Furniture & Garden" },
+  { name: "Friends, Family & Relationships" },
+  { name: "Cars & Motorbikes" },
+];
