@@ -325,17 +325,34 @@ selectors.usernameLoader = getElement(`[${prefix[0]}=loader-dots-username]`);
 selectors.submitBtnLoader = getElement(`[${prefix[0]}=loader-submit]`);
 selectors.submitBtn = getElement(`[${prefix[0]}=submitBtn]`);
 selectors.popupForm = getElement(`[${prefix[1]}=second-form]`);
+selectors.popupOtherSection = getElement(`[${prefix[3]}=other-values]`);
+selectors.popupItemNormal = getElement(`[${prefix[3]}=other-item]`);
 
 selectors.checkAllEmotions.addEventListener("click", () => {
   setInnerText(selectors.popupTitleEle, "All emotions");
   setInnerText(selectors.popupTileOneEle, "Shared emotions");
   setInnerText(selectors.popupTileTwoEle, "All other emotions");
+  selectors.popupOtherSection.innerHTML = "";
+  allEmotions.slice(1, 8).forEach((item) => {
+    const clonedEle = selectors.popupItemNormal.cloneNode(true);
+    setInnerText(clonedEle, item);
+    selectors.popupOtherSection.appendChild(clonedEle);
+  });
 });
 
 selectors.checkAllInterests.addEventListener("click", () => {
   setInnerText(selectors.popupTitleEle, "All interests");
   setInnerText(selectors.popupTileOneEle, "Shared interests");
   setInnerText(selectors.popupTileTwoEle, "All other interests");
+  selectors.popupOtherSection.innerHTML = "";
+  allInterests
+    .slice(6, 12)
+    .map((item) => item.name)
+    .forEach((item) => {
+      const clonedEle = selectors.popupItemNormal.cloneNode(true);
+      setInnerText(clonedEle, item);
+      selectors.popupOtherSection.appendChild(clonedEle);
+    });
 });
 
 mainWrapperEle.addEventListener("click", () => {
@@ -363,7 +380,7 @@ selectors.submitBtnClick = getElement(
   `[${prefix[0]}=submitBtn]`
 )?.addEventListener("click", formSubmit);
 
-const emotions = [
+const allEmotions = [
   "Admiration",
   "Excitement",
   "Disapproval",
@@ -376,7 +393,7 @@ const emotions = [
   "Neutral",
 ];
 
-const interests = [
+const allInterests = [
   { name: "Television & Film" },
   { name: "Music" },
   { name: "Shopping & Retail" },
