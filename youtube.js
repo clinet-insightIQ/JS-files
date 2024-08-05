@@ -559,7 +559,7 @@ function renderBarGraphs(graphData) {
   return new window.Chart(graphData.ref, {
     type: "bar",
     data: {
-      labels: xAxisData,
+      labels: graphData.xAxisData,
       datasets: [
         {
           // label: "Date Posted",
